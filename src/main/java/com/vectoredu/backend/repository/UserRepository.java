@@ -18,6 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByVerificationCode(String verificationCode);
 
 
-    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.courses WHERE u.email = :email")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.courses WHERE u.email = :email")
     Optional<User> findByEmailWithCourses(@Param("email") String email);
 }
