@@ -14,11 +14,11 @@ public class EmailService {
 
     public void sendVerificationEmail(String to, String subject, String text) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");  // Указываем кодировку
 
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setText(text, true);
+        helper.setText(text, true); // true указывает, что это HTML
 
         emailSender.send(message);
     }
