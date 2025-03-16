@@ -109,7 +109,7 @@ public class PasswordService {
         PasswordResetToken passwordResetToken = new PasswordResetToken(user, newPassword, token, LocalDateTime.now().plusMinutes(15));
         passwordResetTokenRepository.save(passwordResetToken);
 
-        String resetLink = "https://localhost:8080/" + endpoint + "?token=" + token;
+        String resetLink = "https://babichschool.ru/" + endpoint + "?token=" + token;
         sendPasswordResetEmail(user, resetLink);
     }
 
