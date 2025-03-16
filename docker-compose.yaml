@@ -18,8 +18,8 @@ services:
 
   backend:
     build: .
-    depends_on:
-      - db
+#    depends_on:
+#      - db
     ports:
       - "8081:8080"
     env_file:
