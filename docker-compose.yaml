@@ -1,20 +1,20 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    container_name: postgres-db
-    restart: always
-    env_file:
-      - .env
-    environment:
-      POSTGRES_DB: taskDB
-      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
-      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+#  db:
+#    image: postgres:15
+#    container_name: postgres-db
+#    restart: always
+#    env_file:
+#      - .env
+#    environment:
+#      POSTGRES_DB: taskDB
+#      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
+#      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
 
   backend:
     build: .
