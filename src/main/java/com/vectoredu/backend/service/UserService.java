@@ -273,6 +273,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Прогресс для этого урока не найден"));
 
         lessonProgress.setStatus(ProgressStatus.COMPLETED);
+
         lessonProgressRepository.save(lessonProgress);
 
         // После завершения урока, обновляем статус блока

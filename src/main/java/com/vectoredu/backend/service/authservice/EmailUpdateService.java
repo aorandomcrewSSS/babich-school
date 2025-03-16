@@ -102,11 +102,18 @@ public class EmailUpdateService {
     }
 
     private String generateEmailUpdateContent(String confirmationLink) {
-        return "<html><body>"
-                + "<h2>Подтверждение смены email</h2>"
-                + "<p>Для завершения смены email, перейдите по ссылке:</p>"
-                + "<a href=\"" + confirmationLink + "\">Подтвердить email</a>"
-                + "</body></html>";
+        return "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">Подтверждение смены email</h2>"
+                + "<p style=\"font-size: 16px;\">Для завершения смены email, перейдите по следующей ссылке:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">Ссылка для подтверждения email</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + confirmationLink + "</p>"
+                + "</div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
     }
 
     private String getCurrentUserEmail() {

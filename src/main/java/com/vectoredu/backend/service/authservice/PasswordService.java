@@ -41,6 +41,15 @@ public class PasswordService {
         }
         validateNewPassword(newPassword);
 
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByUser(user)
+                .orElse(null);
+        // Удаляем старый токен (если существует)
+
+        if (passwordResetToken != null) {
+            passwordResetTokenRepository.delete(passwordResetToken);
+            passwordResetTokenRepository.flush();
+        }
+
         // Создаем токен подтверждения смены пароля
         createAndSendPasswordResetToken(user, newPassword, "users/confirm-password-change");
     }
@@ -51,6 +60,17 @@ public class PasswordService {
     public void requestPasswordReset(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Пользователь с таким email не найден"));
+
+
+        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByUser(user)
+                .orElse(null);
+        // Удаляем старый токен (если существует)
+
+        if (passwordResetToken != null) {
+            passwordResetTokenRepository.delete(passwordResetToken);
+            passwordResetTokenRepository.flush();
+
+        }
 
         // Создаем токен для сброса пароля
         createAndSendPasswordResetToken(user, null, "auth/reset-password");
@@ -67,7 +87,7 @@ public class PasswordService {
         updatePassword(user, passwordResetToken.getNewPassword());
         passwordResetTokenRepository.delete(passwordResetToken);
 
-        sendPasswordChangedNotification(user);
+        sendEmailChangedNotification(user);
     }
 
     /**
@@ -81,7 +101,7 @@ public class PasswordService {
         updatePassword(user, newPassword);
         passwordResetTokenRepository.delete(passwordResetToken);
 
-        sendPasswordChangedNotification(user);
+        sendEmailChangedNotification(user);
     }
 
     private void createAndSendPasswordResetToken(User user, String newPassword, String endpoint) {
@@ -117,14 +137,31 @@ public class PasswordService {
 
     private void sendPasswordResetEmail(User user, String resetLink) {
         String subject = "Восстановление пароля";
-        String htmlMessage = "<p>Для восстановления пароля перейдите по ссылке:</p>"
-                + "<p><a href=\"" + resetLink + "\">" + resetLink + "</a></p>";
+        String htmlMessage = generatePasswordResetContent(resetLink);
 
         sendEmail(user, subject, htmlMessage);
     }
 
-    private void sendPasswordChangedNotification(User user) {
-        sendEmail(user, "Пароль успешно изменен", "Ваш пароль был успешно изменен.");
+    private void sendEmailChangedNotification(User user) {
+        String subject = "Пароль успешно изменен";
+        String message = "Ваш пароль был успешно изменен.";
+
+        sendEmail(user, subject, message);
+    }
+
+    private String generatePasswordResetContent(String resetLink) {
+        return "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">Восстановление пароля</h2>"
+                + "<p style=\"font-size: 16px;\">Для восстановления пароля перейдите по следующей ссылке:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">Ссылка для восстановления пароля</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + resetLink + "</p>"
+                + "</div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
     }
 
     private void sendEmail(User user, String subject, String htmlMessage) {
