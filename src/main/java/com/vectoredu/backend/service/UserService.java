@@ -68,8 +68,9 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         return user.getCourses().stream()
-                .filter(course -> course.getStatus() == Status.ACTIVE || user.getRole() != Role.USER)  // Фильтруем курсы по статусу ACTIVE
+                .filter(course -> course.getStatus() == Status.ACTIVE || user.getRole() != Role.USER)
                 .map(course -> mapToCourseResponse(course, user))
+                .distinct()  // исключение дубликатов
                 .toList();
     }
 
