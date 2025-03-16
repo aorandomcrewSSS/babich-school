@@ -6,7 +6,7 @@ services:
     container_name: postgres-db
     restart: always
     env_file:
-      - .env
+      - ./root/backend/.env
     environment:
       POSTGRES_DB: taskDB
       POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
@@ -23,7 +23,7 @@ services:
     ports:
       - "8081:8080"
     env_file:
-      - .env
+      - ./root/backend/.env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/taskDB
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
