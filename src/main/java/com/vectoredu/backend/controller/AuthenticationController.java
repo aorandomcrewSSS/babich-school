@@ -78,4 +78,22 @@ public class AuthenticationController {
         authenticationService.resendVerificationCode(email);
         return ResponseEntity.ok("Код для подтверждения отправлен");
     }
+
+    /**
+     * Запрос на восстановление пароля неаутентифицированным пользователем.
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> requestPasswordReset(@RequestParam String email) {
+        passwordService.requestPasswordReset(email);
+        return ResponseEntity.ok("На вашу почту отправлено письмо с инструкциями по восстановлению пароля.");
+    }
+
+    /**
+     * Подтверждение восстановления пароля.
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
+        passwordService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Пароль успешно сброшен.");
+    }
 }

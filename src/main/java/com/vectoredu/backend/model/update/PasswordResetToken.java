@@ -25,6 +25,7 @@ public class PasswordResetToken {
     private String newPassword; // Добавляем поле для нового пароля
     private String token;
     private LocalDateTime expiresAt;
+    private boolean used;
 
     public PasswordResetToken(User user, String newPassword, String token, LocalDateTime expiresAt) {
         this.user = user;

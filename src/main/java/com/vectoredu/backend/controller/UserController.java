@@ -33,7 +33,8 @@ public class UserController {
     }
 
     @PostMapping("/request-password-reset")
-    public ResponseEntity<String> requestPasswordReset(@RequestParam String oldPassword, String newPassword) {
+    public ResponseEntity<String> requestPasswordReset(@RequestParam String oldPassword,
+                                                       @RequestParam String newPassword) {
         passwordService.requestPasswordChange(oldPassword,newPassword);
         return ResponseEntity.ok("Ссылка для сброса пароля отправлена на вашу почту");
     }

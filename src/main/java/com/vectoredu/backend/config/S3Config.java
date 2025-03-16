@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 
-
 @Configuration
 public class S3Config {
 

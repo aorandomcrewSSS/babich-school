@@ -31,42 +31,66 @@ public class PasswordService {
     private final UserRepository userRepository;
     private final PasswordValidator passwordValidator;
 
+    /**
+     * Запрос на изменение пароля аутентифицированным пользователем.
+     */
     public void requestPasswordChange(String oldPassword, String newPassword) {
-        // Получаем текущего аутентифицированного пользователя
         User user = getCurrentUser();
-
-        // Проверяем, что старый пароль верный
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new ValidationException("Неверный старый пароль");
         }
-
-        // Валидируем новый пароль
         validateNewPassword(newPassword);
 
-        // Генерируем токен для подтверждения смены пароля
+        // Создаем токен подтверждения смены пароля
+        createAndSendPasswordResetToken(user, newPassword, "users/confirm-password-change");
+    }
+
+    /**
+     * Запрос на восстановление пароля неаутентифицированным пользователем.
+     */
+    public void requestPasswordReset(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Пользователь с таким email не найден"));
+
+        // Создаем токен для сброса пароля
+        createAndSendPasswordResetToken(user, null, "auth/reset-password");
+    }
+
+    /**
+     * Подтверждение смены пароля по токену.
+     */
+    public void confirmPasswordChange(String token) {
+        PasswordResetToken passwordResetToken = validatePasswordResetToken(token);
+        User user = passwordResetToken.getUser();
+        validateNewPassword(passwordResetToken.getNewPassword());
+
+        updatePassword(user, passwordResetToken.getNewPassword());
+        passwordResetTokenRepository.delete(passwordResetToken);
+
+        sendPasswordChangedNotification(user);
+    }
+
+    /**
+     * Подтверждение восстановления пароля.
+     */
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken passwordResetToken = validatePasswordResetToken(token);
+        User user = passwordResetToken.getUser();
+
+        validateNewPassword(newPassword);
+        updatePassword(user, newPassword);
+        passwordResetTokenRepository.delete(passwordResetToken);
+
+        sendPasswordChangedNotification(user);
+    }
+
+    private void createAndSendPasswordResetToken(User user, String newPassword, String endpoint) {
         String token = UUID.randomUUID().toString();
         PasswordResetToken passwordResetToken = new PasswordResetToken(user, newPassword, token, LocalDateTime.now().plusMinutes(15));
         passwordResetTokenRepository.save(passwordResetToken);
 
-        // Отправляем email с ссылкой для подтверждения смены пароля
-        String resetLink = "https://localhost:8080/auth/confirm-password-change?token=" + token;
-        sendPasswordChangeConfirmationEmail(user, resetLink);
-    }
-
-    public void confirmPasswordChange(String token) {
-        // Проверяем токен
-        PasswordResetToken passwordResetToken = validatePasswordResetToken(token);
-        User user = passwordResetToken.getUser();
-
-        // Валидируем новый пароль
-        validateNewPassword(passwordResetToken.getNewPassword());
-
-        // Обновляем пароль
-        updatePassword(user, passwordResetToken.getNewPassword());
-        passwordResetTokenRepository.delete(passwordResetToken);
-
-        // Отправляем уведомление о успешной смене пароля
-        sendPasswordChangedNotification(user);
+        String resetLink = "https://localhost:8080/" + endpoint + "?token=" + token;
+        sendPasswordResetEmail(user, resetLink);
     }
 
     private void validateNewPassword(String newPassword) {
@@ -76,8 +100,7 @@ public class PasswordService {
     }
 
     private void updatePassword(User user, String newPassword) {
-        String encodedPassword = passwordEncoder.encode(newPassword);
-        user.setPassword(encodedPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 
@@ -92,18 +115,16 @@ public class PasswordService {
         return passwordResetToken;
     }
 
-    private void sendPasswordChangeConfirmationEmail(User user, String resetLink) {
-        String subject = "Подтверждение смены пароля";
-        String htmlMessage = generatePasswordChangeConfirmationContent(resetLink);
+    private void sendPasswordResetEmail(User user, String resetLink) {
+        String subject = "Восстановление пароля";
+        String htmlMessage = "<p>Для восстановления пароля перейдите по ссылке:</p>"
+                + "<p><a href=\"" + resetLink + "\">" + resetLink + "</a></p>";
 
         sendEmail(user, subject, htmlMessage);
     }
 
     private void sendPasswordChangedNotification(User user) {
-        String subject = "Пароль успешно изменен";
-        String message = "Ваш пароль был успешно изменен.";
-
-        sendEmail(user, subject, message);
+        sendEmail(user, "Пароль успешно изменен", "Ваш пароль был успешно изменен.");
     }
 
     private void sendEmail(User user, String subject, String htmlMessage) {
@@ -112,21 +133,6 @@ public class PasswordService {
         } catch (MessagingException e) {
             log.error("Ошибка при отправке email", e);
         }
-    }
-
-    private String generatePasswordChangeConfirmationContent(String resetLink) {
-        return "<html>"
-                + "<body style=\"font-family: Arial, sans-serif;\">"
-                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
-                + "<h2 style=\"color: #333;\">Подтверждение смены пароля</h2>"
-                + "<p style=\"font-size: 16px;\">Для завершения смены пароля перейдите по следующей ссылке:</p>"
-                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-                + "<h3 style=\"color: #333;\">Ссылка для смены пароля</h3>"
-                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + resetLink + "</p>"
-                + "</div>"
-                + "</div>"
-                + "</body>"
-                + "</html>";
     }
 
     private User getCurrentUser() {
@@ -138,5 +144,6 @@ public class PasswordService {
         throw new NotFoundException("Не удалось получить аутентифицированного пользователя");
     }
 }
+
 
 

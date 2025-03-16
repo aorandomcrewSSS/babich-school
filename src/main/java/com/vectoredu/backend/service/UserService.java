@@ -196,7 +196,7 @@ public class UserService {
                 .map(lesson -> new SubLesson(
                         lesson.getId(),
                         lesson.getTitle(),
-                        lesson.getImageUrl(),
+                        block.getCourse().getImageUrl(),
                         lessonProgressMap.get(lesson.getId()),// Если записи нет, вернется null
                         lesson.getOrder()
                 ))

@@ -117,7 +117,7 @@ public class AdminService {
                 .map(lesson -> new SubLessonAdmin(
                         lesson.getId(),
                         lesson.getTitle(),
-                        lesson.getImageUrl(),
+                        block.getCourse().getImageUrl(),
                         lesson.getOrder()
                 ))
                 .sorted(Comparator.comparingInt(SubLessonAdmin::getOrder))
