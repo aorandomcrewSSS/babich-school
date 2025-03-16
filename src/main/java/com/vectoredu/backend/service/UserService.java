@@ -69,8 +69,7 @@ public class UserService {
 
         return user.getCourses().stream()
                 .filter(course -> course.getStatus() == Status.ACTIVE || user.getRole() != Role.USER)
-                .map(course -> mapToCourseResponse(course, user))
-                .distinct()  // исключение дубликатов
+                .map(course -> mapToCourseResponse(course, user))// исключение дубликатов
                 .toList();
     }
 
@@ -343,19 +342,15 @@ public class UserService {
     private UserCourse mapToCourseResponse(Course course, User user) {
         // Получаем все блоки для курса с их прогрессом пользователя за один запрос
         List<Block> blocks = blockRepository.findBlocksWithLessonsByCourseId(course.getId());
-        List<Long> blockIds = blocks.stream().map(Block::getId).toList();
 
         // Получаем прогресс пользователя по всем блокам курса за один запрос
         List<BlockProgress> blockProgressList = blockProgressRepository.findProgressByUserAndBlocks(user, blocks);
 
-        // Создаем Map для быстрого доступа к прогрессу по ID блока
-        Map<Long, BlockProgress> progressMap = blockProgressList.stream()
-                .collect(Collectors.toMap(bp -> bp.getBlock().getId(), bp -> bp));
-
         // Рассчитываем количество завершенных блоков
         int completedBlocksCount = (int) blocks.stream()
-                .filter(block -> progressMap.containsKey(block.getId()) &&
-                        progressMap.get(block.getId()).getStatus() == ProgressStatus.COMPLETED)
+                .filter(block -> blockProgressList.stream()
+                        .anyMatch(bp -> bp.getBlock().getId().equals(block.getId()) &&
+                                bp.getStatus() == ProgressStatus.COMPLETED))
                 .count();
 
         int totalBlocksCount = blocks.size();  // Общее количество блоков
@@ -368,4 +363,5 @@ public class UserService {
                 .blocksCount(totalBlocksCount)  // Общее количество блоков
                 .build();
     }
+
 }
