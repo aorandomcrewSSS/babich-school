@@ -9,8 +9,8 @@ services:
       - .env
     environment:
       POSTGRES_DB: taskDB
-      POSTGRES_USER: ${SPRING_DATASOURCE_USERNAME}
-      POSTGRES_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      POSTGRES_USER: Student
+      POSTGRES_PASSWORD: 1769
     ports:
       - "5432:5432"
     volumes:
