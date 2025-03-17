@@ -15,7 +15,7 @@ public class BackupScheduler {
         this.backupService = backupService;
     }
 
-//    @Scheduled(fixedRate = 10800000) // Каждые 3 часа
+   @Scheduled(fixedRate = 10800000) // Каждые 3 часа
     public void scheduleDatabaseBackup() {
         try {
             backupService.createAndUploadBackup();
