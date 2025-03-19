@@ -49,7 +49,7 @@ public class AuthenticationService {
 
     // Аутентификация пользователя
     public LoginResponse authenticate(LoginUserDto input) {
-        User user = findUserByEmail(input.getEmail());
+        User user = findUserByEmail(input.getEmail().replace(" ", ""));
         checkUserEnabled(user);
         try {
             authenticateUser(input);
@@ -182,7 +182,7 @@ public class AuthenticationService {
 
     private void authenticateUser(LoginUserDto input) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(input.getEmail(), input.getPassword())
+                new UsernamePasswordAuthenticationToken(input.getEmail().replace(" ", ""), input.getPassword())
         );
     }
 
